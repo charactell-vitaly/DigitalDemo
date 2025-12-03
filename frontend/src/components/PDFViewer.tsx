@@ -1,5 +1,6 @@
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import { apiClient } from "../services/apiClient";
 // Import viewer styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
@@ -7,7 +8,7 @@ import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 export default function PDFViewer({ docId }: { docId: string }) {
     const defaultLayout = defaultLayoutPlugin();
 
-    const pdfUrl = `http://localhost:8808/api/results/pdf/${docId}`;
+    const pdfUrl = apiClient.getPDFUrl(docId);
 
     return (
         <div className="h-[85vh] border rounded bg-gray-50">

@@ -4,13 +4,14 @@ from pathlib import Path
 from datetime import datetime
 from typing import List
 
-from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+import os
 
 from .schemas import DocumentListItem, DocumentDetail, NotifyResultReadyPayload
 from .db import get_connection, init_db
-from .config import INCOMING_ROOT, RESULTS_ROOT
+from .config import INCOMING_ROOT, RESULTS_ROOT, CORS_ORIGINS
 
 
 app = FastAPI(title="Doc Portal Backend", version="0.1.0")
@@ -21,7 +22,7 @@ init_db()
 # CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],    # Allow everything for POC
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -252,3 +253,50 @@ def notify_error(payload: dict = Body(...)):
     conn.close()
 
     return {"status": "ok"}
+
+
+@app.post("/api/documents/{doc_id}/approve")
+def approve_document(doc_id: str):
+    conn = get_connection()
+
+    exists = conn.execute("SELECT 1 FROM documents WHERE id = ?", (doc_id,)).fetchone()
+    if not exists:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    conn.execute("""
+        UPDATE documents
+        SET status = 'approved'
+        WHERE id = ?
+    """, (doc_id,))
+    conn.commit()
+    conn.close()
+
+    return {"status": "ok"}
+
+
+@app.put("/api/documents/{doc_id}/results")
+def save_processed_document(doc_id: str, payload: dict = Body(...)):
+    """
+    Persist the updated processed JSON to the original results file
+    located at RESULTS_ROOT/<doc_id>/<doc_id>.json if present.
+    """
+    # Find current json path from DB first
+    conn = get_connection()
+    row = conn.execute("SELECT result_json_path FROM documents WHERE id = ?", (doc_id,)).fetchone()
+    conn.close()
+
+    if not row or not row["result_json_path"]:
+        raise HTTPException(status_code=404, detail="Original JSON file path not set")
+
+    json_path = Path(row["result_json_path"])  # ensure Path object
+    if not json_path.exists():
+        raise HTTPException(status_code=404, detail="Original JSON file not found")
+
+    try:
+        with json_path.open("w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to write JSON: {e}")
+
+    return {"id": doc_id, "saved": True}

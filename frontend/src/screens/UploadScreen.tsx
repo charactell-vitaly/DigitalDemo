@@ -1,6 +1,7 @@
 import { useState } from "react";
-import Layout from "../components/layout";
+import Layout from "../components/Layout";
 import { useNavigate } from "react-router-dom";
+import { apiClient } from "../services/apiClient";
 
 export default function UploadScreen() {
   const [file, setFile] = useState<File | null>(null);
@@ -19,22 +20,10 @@ export default function UploadScreen() {
     setIsUploading(true);
     setStatus("");
 
-    const form = new FormData();
-    form.append("file", file);
-    form.append("type", docType);
-
     try {
-      const res = await fetch("http://localhost:8808/api/upload", {
-        method: "POST",
-        body: form,
-      });
-
-      if (res.ok) {
-        setStatus("Upload successful!");
-        setTimeout(() => navigate("/documents"), 500);
-      } else {
-        setStatus("Upload failed.");
-      }
+      await apiClient.uploadDocument(file, docType);
+      setStatus("Upload successful!");
+      setTimeout(() => navigate("/documents"), 500);
     } catch (err) {
       setStatus("Upload error: " + (err as Error).message);
     } finally {
