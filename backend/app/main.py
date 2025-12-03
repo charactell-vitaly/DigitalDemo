@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 
 from .schemas import DocumentListItem, DocumentDetail, NotifyResultReadyPayload
 from .db import get_connection, init_db
-from .config import INCOMING_ROOT, RESULTS_ROOT
+from .config import INCOMING_ROOT, RESULTS_ROOT, CORS_ORIGINS
 
 
 app = FastAPI(title="Doc Portal Backend", version="0.1.0")
@@ -21,7 +21,7 @@ init_db()
 # CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],    # Allow everything for POC
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

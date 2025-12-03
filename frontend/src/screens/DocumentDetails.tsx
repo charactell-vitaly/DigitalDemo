@@ -1,26 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PDFViewer from "../components/PDFViewer";
-
-interface Field {
-    field_name: string;
-    field_value: string;
-    visible: boolean;
-    description: string;
-    readonly: boolean;
-}
-
-interface Page {
-    fields: Field[];
-}
-
-interface Job {
-    pages: Page[];
-}
+import { apiClient } from "../services/apiClient";
+import type { ProcessedDocument } from "../services/apiClient";
 
 export default function DocumentDetails() {
     const { docId } = useParams<{ docId: string }>();
-    const [job, setJob] = useState<Job | null>(null);
+    const [job, setJob] = useState<ProcessedDocument | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -31,13 +17,7 @@ export default function DocumentDetails() {
 
         async function load() {
             try {
-                const res = await fetch(`http://localhost:8808/api/results/json/${docId}`);
-                if (!res.ok) {
-                    setError(`Backend error: ${res.status}`);
-                    return;
-                }
-
-                const data = await res.json();
+                const data = await apiClient.getProcessedDocument(docId);
                 console.log("DETAIL RESPONSE:", data);
 
                 if (!data || !data.pages) {

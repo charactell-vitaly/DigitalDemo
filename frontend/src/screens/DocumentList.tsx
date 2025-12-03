@@ -1,20 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
-
-interface Doc {
-    id: string;
-    original_name: string;
-    status: string;
-}
+import { apiClient } from "../services/apiClient";
+import type { DocumentListItem } from "../services/apiClient";
 
 export default function DocumentList() {
-    const [docs, setDocs] = useState<Doc[]>([]);
+    const [docs, setDocs] = useState<DocumentListItem[]>([]);
 
     useEffect(() => {
-        fetch("http://localhost:8808/api/documents")
-            .then((res) => res.json())
-            .then((data) => setDocs(data));
+        apiClient.listDocuments().then((data) => setDocs(data));
     }, []);
 
     // --- Compute counters ---
