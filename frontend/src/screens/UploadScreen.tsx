@@ -36,7 +36,7 @@ export default function UploadScreen() {
       <div className="max-w-lg mx-auto bg-white border rounded-xl shadow p-8">
         <h1 className="text-2xl font-semibold mb-6">Upload Document</h1>
 
-        {/* Document Type */}
+        {/* Document Type
         <label className="block mb-4 text-gray-700">
           Document Type
           <select
@@ -49,7 +49,7 @@ export default function UploadScreen() {
             <option value="receipt">Receipt</option>
             <option value="contract">Contract</option>
           </select>
-        </label>
+        </label> */}
 
         {/* File Picker */}
         <label className="block mb-6 text-gray-700">

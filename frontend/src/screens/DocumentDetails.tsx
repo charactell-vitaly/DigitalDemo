@@ -46,9 +46,10 @@ export default function DocumentDetails() {
     // Derive data only after validating job/pages, but keep hooks above
     const isJobReady = job && Array.isArray(job.pages) && job.pages.length >= 2;
     const dataPage = isJobReady ? job!.pages[1] : null;
-    const visibleFields = dataPage ? (dataPage.fields || []).filter((f) => f.visible) : [];
-    const headerFields = visibleFields.filter((f) => f.array_index === -1 || f.array_index === 0);
-    const tableFields = visibleFields.filter((f) => (f.array_index ?? -1) > 0);
+    // Show all fields (ignore visible flag since backend may set all fields as visible=false)
+    const allFields = dataPage ? (dataPage.fields || []) : [];
+    const headerFields = allFields.filter((f) => f.array_index === -1 || f.array_index === 0);
+    const tableFields = allFields.filter((f) => (f.array_index ?? -1) > 0);
 
     const columnsMeta = Array.from(
         new Map(

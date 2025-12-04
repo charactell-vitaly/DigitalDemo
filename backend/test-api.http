@@ -1,6 +1,5 @@
 ### 0. Health check
-@doc_id = 8347e1a0-c92e-42a6-a216-85f57e094380
-
+@doc_id = 17ee0984-b5b0-468d-9f59-af8db36532d1
 
 GET http://localhost:8808/health
 
